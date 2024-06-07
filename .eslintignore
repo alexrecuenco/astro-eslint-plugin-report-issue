@@ -1,0 +1,20 @@
+!*.js
+!*.mjs
+!*.cjs
+!*.ts
+lib/
+build/
+build-*/
+dist/
+.vscode/
+!.vscode/*.json
+
+node_modules/
+coverage/
+report/
+package-lock.json
+.pre-commit-cache
+
+openapi.*
+*codequality.json
+# **/metadata.* # if linting becomes slow, remove all metadata files
