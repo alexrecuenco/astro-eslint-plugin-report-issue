@@ -1,5 +1,8 @@
 ---
-const a: any = 1;
+const a = 1;
+console.log("b");
+
+const c: any = 1;
 const b = 0;
 ---
 
@@ -11,7 +14,21 @@ const b = 0;
     <meta name="generator" content={Astro.generator} />
     <title>Astro</title>
   </head>
-  <body>
-    <h1>Astro {a}</h1>
+  <body id="myroot">
+    <div class="container">
+      <h1>Astro {a}</h1>
+    </div>
   </body>
+
+  <script>
+    const c = null!;
+    const d: any = 1;
+
+    const element = document.getElementById("my-root")!;
+    element.offsetLeft += 4;
+    console.log(d);
+    console.log("c");
+    const container = document.querySelector(".container")!;
+    container.scrollLeft += 2;
+  </script>
 </html>
