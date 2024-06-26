@@ -25,14 +25,23 @@ const b = 0;
     const d: any = 1;
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    // Unsafe assignment of an error typed value
     const element = document.getElementById("myroot")!;
     // no error
     console.log(element.offsetLeft + 4);
     // error  Invalid operand for a '+' operation. Operands must each be a number or string. Got `any`  @typescript-eslint/restrict-plus-operands
-    console.log(element.offsetLeft += 4);
+    console.log((element.offsetLeft += 4));
     console.log(d);
     console.log("c");
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const container = document.querySelector(".container")!;
     container.scrollLeft += 2;
+    function scrollRight() {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const other = document.querySelector(".other")!;
+      const value = other.scrollLeft;
+      other.scrollLeft = value + 2;
+    }
+    scrollRight();
   </script>
 </html>

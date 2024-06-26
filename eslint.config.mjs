@@ -17,10 +17,10 @@ export default [
   {
     languageOptions: {
       parserOptions: {
-        project: ["./tsconfig.json"],
+        project: ["./tsconfig.json", "./tsconfig.eslint.json"],
         // When typescript/eslint v8 comes out this will become projectService
         // https://github.com/typescript-eslint/typescript-eslint/issues/9141
-        // EXPERIMENTAL_useProjectService: true,
+        EXPERIMENTAL_useProjectService: true,
         DEPRECATED__createDefaultProgram: true,
         tsconfigRootDir: import.meta.dirname,
       },
