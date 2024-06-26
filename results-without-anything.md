@@ -15,7 +15,7 @@ const result = {
 }
 ```
 
-```txt
+```bash
 
 ❯ npx eslint . --debug
   eslint:cli CLI args: [ '.', '--debug' ] +0ms
