@@ -24,8 +24,12 @@ const b = 0;
     const c = null!;
     const d: any = 1;
 
-    const element = document.getElementById("my-root")!;
-    element.offsetLeft += 4;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const element = document.getElementById("myroot")!;
+    // no error
+    console.log(element.offsetLeft + 4);
+    // error  Invalid operand for a '+' operation. Operands must each be a number or string. Got `any`  @typescript-eslint/restrict-plus-operands
+    console.log(element.offsetLeft += 4);
     console.log(d);
     console.log("c");
     const container = document.querySelector(".container")!;

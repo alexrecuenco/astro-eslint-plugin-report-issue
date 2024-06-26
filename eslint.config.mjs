@@ -1,10 +1,12 @@
 import eslintPluginAstro from 'eslint-plugin-astro';
 import tseslint from "typescript-eslint";
-
+/** @type {import("@typescript-eslint/utils").TSESLint.FlatConfig.ConfigArray} */
 export default [
-  ...tseslint.configs.recommended,
+  {ignores: ["*.config.*"]},
+  ...tseslint.configs.strictTypeChecked,
+  ...tseslint.configs.stylisticTypeChecked,
   // First issue, eslintPluginAstro MUST be defined after, since it overrides the typescript parser
-  ...eslintPluginAstro.configs['flat/all'],
+  ...eslintPluginAstro.configs["flat/all"],
   {
     rules: {
       '@typescript-eslint/await-thenable': "error",
