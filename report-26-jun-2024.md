@@ -1,3 +1,5 @@
+# [parsing error]  Typescript Parsing error silently on `<script>` tags. Requires `--debug`. (`ESLint was configured to run on... .astro/1_2.ts`, TSConfig does not include this file )
+
 ### Before You File a Bug Report Please Confirm You Have Done The Following...
 
 - [X] I have tried restarting my IDE and the issue persists.
@@ -14,9 +16,11 @@
 ### What did you do?
 
 Please find the minimal reproducible case in the repository linked below
+
 <details>
-<summary>Configuration</summary>
-```
+<summary>package.json</summary>
+
+```json
 {
   "name": "astro-eslint-plugin-issue-report",
   "type": "module",
@@ -42,8 +46,12 @@ Please find the minimal reproducible case in the repository linked below
   }
 }
 ```
+</details>
 
-```
+<details>
+<summary>eslint.config.mjs</summary>
+
+```js
 import eslintPluginAstro from 'eslint-plugin-astro';
 import tseslint from "typescript-eslint";
 /** @type {import("@typescript-eslint/utils").TSESLint.FlatConfig.ConfigArray} */
@@ -75,6 +83,10 @@ export default [
 ];
 ```
 </details>
+
+
+<details>
+<summary>src/index.astro</summary>
 
 ```astro
 ---
@@ -112,6 +124,7 @@ const b = 0;
   </script>
 </html>
 ```
+</details>
 
 
 ### What did you expect to happen?
@@ -124,19 +137,19 @@ The code in between `---` is linted, but not the one inside `script` tags
 
 ### Link to Minimal Reproducible Example
 
-Minimal error can be found here, I made a tag: https://github.com/alexrecuenco/astro-eslint-plugin-report-issue/tree/minimal-error
+Minimal reproducible example can be found at the tag `minimal-error` on this repo (See this last commit for extra details on the exact steps taken): https://github.com/alexrecuenco/astro-eslint-plugin-report-issue/tree/minimal-error
 
 
 
-I did some further exploration and, I describe my brief findings on the commit message at  this tag https://github.com/alexrecuenco/astro-eslint-plugin-report-issue/tree/type-discrepancy
+On top of that, I did some further exploration and I describe my brief findings on the commit message(s) at this tag https://github.com/alexrecuenco/astro-eslint-plugin-report-issue/tree/type-discrepancy
 
 __
 
 ### Additional comments
 
-First of all, I made a similar issue that seems to have dissapeared with a somewhat similar issue, I thought it was fixed, but it turns out it isn't. Nonetheless, the issue was either deleted or cleaned up so I can't reference it anymore
+First of all, I reported an issue that seems to have disappeared with a related problem. I had thought it was fixed, but it turns out it isn't.
 
-By following the recommendations of this plugin's authors I added
+In that thread, —which I can't reference anymore since it must've gotten cleaned/cleared— by following the recommendations of this plugin's authors I added
 
 ```js
   {
@@ -150,7 +163,9 @@ By following the recommendations of this plugin's authors I added
 
 ```
 
-And it seemd to have worked, I stopped getting errors when running. However, turns out, the issue was still hiding away, by running with `--debug` you can see that all the *"virtual files"* that reference the <script> tags are not parsed, so you never get feedback on them, it crashes silently while processing those files (And since those files are virtual, you also don't get reports at the top
+That seems to have done the trick, I stopped getting typescript-eslint crashing when running. Unbeknownst to us, it turns out, the issue was still hiding away. By running with `--debug` you can see that all the *"virtual typescript files"* (`*.astro/1_1.ts`) are not parsed. These represent the `script` tags, and because the error happens in a file that isn't real, eslint doesn't report you the issue, it simply crashes silently while processing those files.
+
+Here is the result running with `--debug`:
 
 
 ```bash
@@ -171,14 +186,19 @@ However, that TSConfig does not include this file. Either:
 
 ```
 
-I have tried to solve it by upgrading to version 8 of typescript eslint and eslint 9, since `projectService` is meant to process files that are "outside the project", but that didn't work due to some other incompatibility between different projects
+I have tried to solve this by:
 
-For that reason, I switched to using `EXPERIMENTAL_useProjectService`, but when that is used now the .astro file, the section in-between the `---` files doesn't run anymore, that one is now the one getting the parse error
+1. Adding the exact file to `includes`
+2. Upgrading typescript from 5.4 to 5.5
+3. By upgrading to version 8 of typescript eslint and eslint 9. I thought that since the new `projectService` is meant to process files that are "outside the project" it should be able to help, but that didn't work due to some other incompatibility between versions, I believe eslint-plugin-astro still doesn't regard eslint 9 as a valid peer dependency.
+4. For that reason, I switched back to version 7 an d8 respectively and tried using `EXPERIMENTAL_useProjectService`. Funnily enough, that makes the top section of an astro file fail with a parsing error, even though `script` tags now report linting appropriately .
+5. Finally, I ran eslint with a debugger line by line, and found the following is where it is diverging paths
 
-Finally, I ran eslint with a debugger line by line, and found
+
+<details>
+<summary><rootDir>/node_modules/@typescript-eslint/typescript-estree/dist/create-program/createProjectProgram.js</summary>
 
 
-<rootDir>/node_modules/@typescript-eslint/typescript-estree/dist/create-program/createProjectProgram.js
 
 ```js
 function createProjectProgram(parseSettings, programsForProjects) {
@@ -193,14 +213,15 @@ function createProjectProgram(parseSettings, programsForProjects) {
 }
 
 ```
+</details>
 
 
-Well, running with `DEPRECATED__createDefaultProgram: true` it "works".
+Well, looking at that section, by using `DEPRECATED__createDefaultProgram: true` in the settings it "works". It can parse both script tags and the top section of an .astro file.
 
-But of course, once you do that, the recommended trick to create a `jsx.d.ts` stops working, it regards everything as "any" (that is what the tag `type-discrepancy` explores)
+But of course, once you do that, the recommended trick to create a `jsx.d.ts` stops working, it regards everything as "any" (that is what the tag [`type-discrepancy`] explores)
 
 
-All the 3 setting permutations and the `--debug` output can be found in the repo at `/results-*.md`
+For context, the full debug output of eslint that I have described can be found in the [repo linked](https://github.com/alexrecuenco/astro-eslint-plugin-report-issue) on the files `/results-*.md`
 
 
 I hope this report is helpful to find how to fix this
